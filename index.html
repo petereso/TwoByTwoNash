@@ -142,7 +142,7 @@
 
 <body>
   
-  <div class="custom-select" style="width:120px; border-radius: 30px;" >
+  <div class="custom-select" style="width:120px;" >
     <select>
       <option value="0">Dominance</option>
       <option value="ISD-Row">ISD (1)</option>
@@ -316,17 +316,17 @@
     </table>
 
     <input type="button" value="Is it Nash?" id="isitnash" onclick="isitNash();"
-      style="border-radius: 5px; width: 80px; border: none; color: white; background-color: silver; padding: 8px 4px; 
-      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;">
+      style="width: 80px; padding: 8px 0px; border: none; color: white; background-color: silver; 
+      text-align: center; text-decoration: none; display: inline-block; margin-left:-1px;cursor: pointer;">
     <input type="button" value="Row mix" id="rowmix" onclick="rowmix();"
-      style="border-radius: 5px;width: 67px; border: none; color: white; background-color: dodgerblue; padding: 8px 4px; 
-      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;">
+      style="width: 67px; padding: 8px 0px; border: none; color: white; background-color: dodgerblue;
+      text-align: center; text-decoration: none; display: inline-block; margin-left:-1px; cursor: pointer;">
     <input type="button" value="Col mix" id="colmix" onclick="colmix();"
-      style="border-radius: 5px; width: 63px; border: none; color: white; background-color: dodgerblue; padding: 8px 4px; 
-      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;">
+      style="width: 63px; padding: 8px 0px; border: none; color: white; background-color: dodgerblue; 
+      text-align: center; text-decoration: none; display: inline-block; margin-left:-1px; cursor: pointer;">
     <input type="button" value="BR Off" id="onoff" onclick="onoff();"
-      style="border-radius: 5px; width: 52px; border: none; color: white; background-color: darkgrey; padding: 8px 4px; 
-      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;">
+      style="width: 52px; padding: 8px 0px; border: none; color: white; background-color: darkgrey;
+      text-align: center; text-decoration: none; display: inline-block; margin-left:-1px; cursor: pointer;">
 
   </div>
 
@@ -488,10 +488,10 @@
         'left-name': 'Stag','right-name': 'Hare',
         'prTop-dft': 0.2,'prRight-dft': 0.7,
         'hint': "Hunting for a stag yields the highest payoff for each player, but only if both take that action. Hunting hare is a 'safe' choice. Potential tension between Pareto efficiency and risk dominance.",
-        tl: {row: 10,col: 10},
-        tr: {row: 0, col: 7},
-        bl: {row: 7, col: 0},
-        br: {row: 6,col: 6},
+        tl: {row: 9,col: 9},
+        tr: {row: 0, col: 6},
+        bl: {row: 6, col: 0},
+        br: {row: 5,col: 5},
         },
       'HD': 
         { 'game-name': 'Hawk-dove game',
@@ -731,7 +731,7 @@
       document.getElementById("bl-colPay").style = "font-weight: normal; color:black";
       document.getElementById("br-colPay").style = "font-weight: normal; color:black";
       document.getElementById("onoff").value="BR Off";
-      document.getElementById("onoff").style="border-radius: 5px; width: 52px; border: none; color: white; background-color: darkgrey; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;";
+      document.getElementById("onoff").style="width: 52px; padding: 8px 0px; border: none; color: white; background-color: darkgrey; text-align: center; text-decoration: none; display: inline-block; margin-left:-1px; cursor: pointer;";
     }
 
     // highlight highest EV for each player
@@ -826,7 +826,7 @@
       btnBRvalue = document.getElementById('onoff').value;
       if(btnBRvalue == "BR Off"){
         document.getElementById("onoff").value="BR On";
-        document.getElementById("onoff").style="border-radius: 5px; width: 52px; border: none; color: white; background-color: purple; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;";
+        document.getElementById("onoff").style="width: 52px; padding: 8px 0px; border: none; color: white; background-color: purple; text-align: center; text-decoration: none; display: inline-block; margin-left:-1px; cursor: pointer;";
         if(document.getElementById("tl-rowPay").innerHTML<=document.getElementById("bl-rowPay").innerHTML){
           document.getElementById("bl-rowPay").style = "font-weight: bolder; color:blue"};
         if(document.getElementById("tl-rowPay").innerHTML>=document.getElementById("bl-rowPay").innerHTML){
@@ -880,7 +880,7 @@
     // reset isitnash button
     function resetNash(){
       document.getElementById("isitnash").value="Is it Nash?";
-      document.getElementById("isitnash").style="border-radius: 5px; width: 80px; border: none; color: white; background-color: orange; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;";
+      document.getElementById("isitnash").style="width: 80px; padding: 8px 0px;  border: none; color: white; background-color: orange; text-align: center; text-decoration: none; display: inline-block; margin-left:-1px;cursor: pointer;";
     };
 
     // check if Nash
@@ -889,10 +889,10 @@
       var colbestresponds = ((document.getElementById("evCol-Left").innerHTML==document.getElementById("evCol-Right").innerHTML) || (document.getElementById("evCol-Left").innerHTML>=document.getElementById("evCol-Right").innerHTML)&&(prRight==0) || (document.getElementById("evCol-Left").innerHTML<=document.getElementById("evCol-Right").innerHTML)&&(prRight==1));
       if (rowbestresponds && colbestresponds){
         document.getElementById("isitnash").value="Nash eqm!";
-        document.getElementById("isitnash").style="border-radius: 5px; width: 80px; border: none; color: white; background-color: green; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;";
+        document.getElementById("isitnash").style="width: 80px; padding: 8px 0px; border: none; color: white; background-color: green; text-align: center; text-decoration: none; display: inline-block; margin-left:-1px;cursor: pointer;";
       }else{
         document.getElementById("isitnash").value="Not Nash!";
-        document.getElementById("isitnash").style="border-radius: 5px; width: 80px; border: none; color: white; background-color: red; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;";
+        document.getElementById("isitnash").style="width: 80px; padding: 8px 0px; border: none; color: white; background-color: red; text-align: center; text-decoration: none; display: inline-block; margin-left:-1px;cursor: pointer;";
       }
     }
   </script>
