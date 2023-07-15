@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two-by-two game analysis</title>
+
+  <style>
+    * {font-family: 'Helvetica', 'Arial', sans-serif; font-size: 15px; max-width: 510px;
+    }
+
+    /* Dropdown menu formatting */
+    .custom-select {
+      position: relative;
+      display: inline-block;
+      overflow-wrap: break-word;}
+    .custom-select select {
+      display: none; }
+    .select-selected {
+      background-color: DodgerBlue;}
+    .select-selected:after { /* style the arrow inside the select element: */
+      position: absolute;
+      content: "";
+      top: 12px;
+      right: 10px;
+      width: 0;
+      height: 0;
+      border: 6px solid transparent;
+      border-color: #fff transparent transparent transparent;}
+    .select-selected.select-arrow-active:after { /* point arrow up when box is active */
+      border-color: transparent transparent #fff transparent;
+      top: 7px;}
+    .select-items div, .select-selected { /* style the options */
+      color: #ffffff;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+      cursor: pointer;}
+    .select-items { /* style items (options) */
+      position: absolute;
+      background-color: DodgerBlue;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 99;}
+    .select-hide { /* hide items when the select box is closed */
+      display: none;}
+    .select-items div:hover, .same-as-selected { /* slight change in bkgrd when hovering */
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Payoff table formatting */
+    .element td {
+      height: 25px;
+      width: 25px;    
+      padding: 6px;
+      text-align: center;}
+    td.colLabel {
+      height: 22px;
+      text-align: right;
+      background-color: pink;
+      padding: 6px;}
+    td.rowLabel {
+      text-align: right;
+      background-color: lightskyblue;
+      padding: 6px;
+      height: 22px;}
+    table.element {
+      border: 1px solid black; 
+      border-collapse: collapse;
+      border-spacing: 0px;}
+    td.rowPayCell {
+      background-color: lightskyblue;}
+    td.colPayCell {
+      background-color: pink;}
+    td.expVal {
+      font-style: italic;
+      text-align: right;} 
+
+    /* Horizontal slider formatting */
+    .hslider {
+      -webkit-appearance: none;  
+      appearance: none;
+      width: 100%; 
+      height: 5px; 
+      border-radius: 5px;
+      background: #d3d3d3; 
+      outline: none; 
+      opacity: 0.7; 
+      -webkit-transition: .2s; 
+      transition: opacity .2s;}
+    .hslider:hover { 
+      opacity: 1; }
+    .hslider::-webkit-slider-thumb { /* slider handle for Chrome, Opera, Safari, Edge */
+      -webkit-appearance: none; 
+      appearance: none;
+      width: 15px; 
+      height: 15px; 
+      background: red; 
+      border-radius: 15px;
+      cursor: pointer; }
+    .hslider::-moz-range-thumb { /* slider handle for Firefox */
+      width: 15px; 
+      height: 15px; 
+      background: #d3d3d3; 
+      cursor: pointer; }
+    
+    /* Vertical slider formatting */
+    .vslider {
+      -webkit-appearance: none;  
+      appearance: none;
+      width: 84px; 
+      height: 5px; 
+      border-radius: 5px;
+      background: #d3d3d3; 
+      outline: none; 
+      opacity: 0.7; 
+      -webkit-transition: .2s; 
+      transition: opacity .2s;
+      -webkit-transform:rotate(90deg); /* rotate by 90 degrees! */
+      -moz-transform:rotate(90deg);
+      -o-transform:rotate(90deg);
+      transform:rotate(270deg);}
+    .vslider:hover {
+      opacity: 1; }
+    .vslider::-webkit-slider-thumb { /* slider handle for webkit */
+      -webkit-appearance: none; 
+      appearance: none;
+      width: 15px; 
+      height: 15px; 
+      background: blue; 
+      border-radius: 15px;
+      cursor: pointer; }
+    .vslider::-moz-range-thumb { /* slider handle for moz */
+      width: 15px; 
+      height: 15px; 
+      background: #d3d3d3; 
+      cursor: pointer; }
+
+  </style>
+</head>
+
+<body>
+  
+  <div class="custom-select" style="width:120px; border-radius: 30px;" >
+    <select>
+      <option value="0">Dominance</option>
+      <option value="ISD-Row">ISD (1)</option>
+      <option value="ISD-Col">ISD (2)</option>
+      <option value="PD">PD</option>
+      <option value="Ddlk">Deadlock</option>
+      <option value="ISD-0Sum">ISD 0-sum</option>
+      <option value="WD">Weak Dom</option>
+      <option value="EntryDet">Entry deterrence</option>
+      <option value="IWD-order">Order in IWD</option>
+      <option value="NashFailsWD">Nash fails WD</option>
+      <option value="ContCoord">Continuous coordination</option>
+    </select>
+  </div>
+
+  <div class="custom-select" style="width:120px;" >
+    <select>
+      <option value="0">Coordination</option>
+      <option value="PureCoord">Pure</option>
+      <option value="FocalCoord">Focal</option>
+      <option value="BoS">BoS</option>
+      <option value="StagHunt">Stag hunt</option>
+      <option value="Invest">Investment</option>
+      <option value="HD">Hawk-dove</option>
+      <option value="Chicken">Chicken</option>
+      <option value="ChCoord">Chicken as coord. game</option>
+      <option value="TwoNash">Two Nash</option>
+      <option value="ContCoord">Continuous coordination</option>
+    </select>
+  </div>
+  
+  <div class="custom-select" style="width:120px;" >
+    <select>
+      <option value="0">Competitive</option>
+      <option value="MP">Matching p's</option>
+      <option value="Comp0Sum">Competitive zero-sum</option>
+      <option value="ConstSum">Constant-sum</option>
+      <option value="EqTo0Sum">Transformed zero-sum</option>
+      <option value="Contest">Contest</option>
+    </select>
+  </div>
+
+  <div class="custom-select" style="width:120px;" >
+    <select>
+      <option value="0">Nongeneric</option>
+      <option value="TwoNash">Two Nash </option>
+      <option value="ContCoord">Continuous coordination</option>
+      <option value="NashFailsWD">Nash fails WD</option>
+      <option value="Cont+1">Continuum +1 Nash</option>
+      <option value="Connected">Connected ranges of Nash</option>
+      <option value="EntryDet">Entry deterrence</option>
+    </select>
+  </div>
+
+  <!-- Page title and explanatory text -->
+  <h2 style="font-size:19px">Equilibrium in 2x2 Games</h2>
+  <p>Choose a game from the categories above. Adjust the sliders representing (mixed) strategies and click on the "Is it Nash?" button to verify if they form a Nash equilibrium. "Row mix" sets the vertical slider (Row's mixing probability) to make Column indifferent. "Col mix" works analogously. The "BR Off/On" button hides/highlights best-reply payoffs in the table.</p>
+  
+  <!-- Display selected game title and the mixing sliders -->
+  <h3 style="font-size:17px"> <div id="selectedGameTitle"></div> </h3>
+
+  <!-- Game display in a fixed-width container centered on the page -->
+  <div style="width:290px; margin: 0 auto;">
+
+    <!-- horizontal slider with probs on either side-->
+    <div style="width: 255px">
+      <div id="colPlaysLeftValue"
+        style="margin-left: 92px; float:left; font-style: italic; color: rgb(181, 103, 116);" >
+        </div>
+      <div 
+        style="width: 81px; margin-left: 124px;">
+        <input type="range" min="0" max="1" step="0.01" class="hslider" id="colPlaysRight">
+      </div>
+      <div id="colPlaysRightValue"
+        style="font-style: italic; float:right; margin-right: 15px; margin-top: -18px; color: rgb(181, 103, 116);">
+      </div>
+    </div>
+    <!-- Vertical slider (rotated in CSS above) inside a container floated to the left -->
+    <div 
+      style="width: 100px; height: 10px; float: left; 
+      margin-top: 67px; margin-left:-37px; margin-right:-53px;">
+      <input type="range" min="0" max="1" step="0.01" class="vslider" id="rowPlaysTop">
+    </div>
+    
+    <!-- Payoff table displayed in html --> 
+    <table style="width: 250px; table-layout: fixed; border-collapse:collapse; background-color: black;">
+      <tr>
+        <td style="width: 28px; background-color:white;"></td>
+        <td style="width: 40px; background-color:white;"></td>
+        <td style="width: 50px; background-color:white;"></td>
+        <td style="width: 50px; background-color:white;"></td>
+        <td style="width: 20px; background-color:white;"></td>
+      </tr>
+      <tr>
+        <td style="background-color:white;"></td>
+        <td style="background-color:white;"></td>
+        <td class="colLabel" 
+          style="border-style:solid;border-width:1px;border-top: white;border-left: white;" 
+          id="leftLabel"></td>
+        <td class="colLabel" 
+          style="border-style:solid;border-width:1px;border-top:white;border-left:white;border-right:white;" 
+          id="rightLabel"></td>
+        <td class="expVal" 
+          style="background-color:white; color: rgb(62, 62, 187); font-size: smaller;">EV</td>
+      </tr>
+      <tr>
+        <td style="font-style: italic; color: rgb(62, 62, 187); background-color: white; vertical-align: top;" id="rowPlaysTopValue"></td>
+        <td class="rowLabel" id="topLabel"
+          style="border-style:solid; border-width:1px;border-top: white;border-left: white;"></td>
+        <td>
+          <table class="element">
+            <tr>
+              <td class="rowPayCell" id="tl-rowPay"></td>
+              <td class="colPayCell" id="tl-colPay" ></td>
+            </tr>
+          </table>
+        </td>
+        <td>
+          <table class="element"">
+            <tr>
+              <td class="rowPayCell" id="tr-rowPay"></td>
+              <td class="colPayCell" id="tr-colPay"></td>
+            </tr>
+          </table>
+        </td>
+        <td class="expVal" 
+          style="color: rgb(62, 62, 187); background-color: white; font-size: smaller;
+          border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;" 
+          id="evRow-Top"></td>
+      </tr>
+      <tr>
+        <td style="font-style: italic; color: rgb(62, 62, 187); vertical-align: bottom; background-color: white;" 
+          id="rowPlaysBtmValue"></td>
+        <td class="rowLabel" id="btmLabel"
+          style="border-style:solid; border-width:1px;border-top:white;border-left:white;border-bottom:white;"></td>
+        <td>
+          <table class="element" >
+            <tr>
+              <td class="rowPayCell" id="bl-rowPay"></td>
+              <td class="colPayCell" id="bl-colPay"></td>
+            </tr>
+          </table>
+        </td>
+        <td>
+          <table class="element" >
+            <tr>
+              <td class="rowPayCell" id="br-rowPay"></td>
+              <td class="colPayCell" id="br-colPay"></td>
+            </tr>
+          </table>
+        </td>
+        <td class="expVal" 
+          style="color: rgb(62, 62, 187); background-color:white; font-size: smaller;
+          border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;" 
+          id="evRow-Btm"></td>
+      </tr>
+      <tr style="height: 25px">
+        <td style="background-color: white; "></td>
+        <td class="expVal" 
+          style="color: rgb(181, 103, 116); background-color: white; font-size: smaller; ">EV&nbsp</td>
+        <td class="expVal" 
+          style="color: rgb(181, 103, 116); background-color: white; font-size: smaller;
+          border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;" 
+          id="evCol-Left">EV[Left]</td>
+        <td class="expVal" 
+          style="color: rgb(181, 103, 116); background-color: white; font-size: smaller;
+          border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;" 
+          id="evCol-Right">EV[Right]</td>
+        <td style="background-color: white; "></td>
+      </tr>
+    </table>
+
+    <input type="button" value="Is it Nash?" id="isitnash" onclick="isitNash();"
+      style="border-radius: 5px; width: 80px; border: none; color: white; background-color: silver; padding: 8px 4px; 
+      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;">
+    <input type="button" value="Row mix" id="rowmix" onclick="rowmix();"
+      style="border-radius: 5px;width: 67px; border: none; color: white; background-color: dodgerblue; padding: 8px 4px; 
+      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;">
+    <input type="button" value="Col mix" id="colmix" onclick="colmix();"
+      style="border-radius: 5px; width: 63px; border: none; color: white; background-color: dodgerblue; padding: 8px 4px; 
+      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;">
+    <input type="button" value="BR Off" id="onoff" onclick="onoff();"
+      style="border-radius: 5px; width: 52px; border: none; color: white; background-color: darkgrey; padding: 8px 4px; 
+      text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;">
+
+  </div>
+
+  <!-- Display explanatory text for the selected game -->
+  <br>
+  <div id="selectedGameHint"></div>
+  <br>
+
+  <script>
+
+    /* List of pre-set games (in javascript) */
+    let games = {
+      'ISD-Row': 
+        { 'game-name': 'Game solvable by ISD (1)',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 1,'prRight-dft': 0,
+        'hint': 'The unique Nash equilibrium can be found by Iterated Strict Dominance. (Start with Row.)',
+        tl: {row: 1,col: 1},
+        tr: {row: 2, col: 0},
+        bl: {row: 0, col: -1},
+        br: {row: 1,col: 1},
+        },
+      'ISD-Col': 
+        { 'game-name': 'Game solvable by ISD (2)',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 1,'prRight-dft': 0,
+        'hint': 'The unique Nash equilibrium can be found by Iterated Strict Dominance. (Check Column.)',
+        tl: {row: 1,col: 2},
+        tr: {row: 0, col: 3},
+        bl: {row: 0, col: 0},
+        br: {row: 1,col: 1},
+        },
+      'PD': 
+        { 'game-name': "Prisoner's Dilemma",
+        'top-name': 'C','btm-name': 'D',
+        'left-name': 'C','right-name': 'D',
+        'prTop-dft': 1,'prRight-dft': 0,
+        'hint': "Each player has a strictly dominant strategy, playing which results in a Pareto-inferior outcome. The Prisoner's Dilemma is a stylized example of how rational individual decisions may ruin social welfare.",
+        tl: {row: 2,col: 2},
+        tr: {row: -3, col: 5},
+        bl: {row: 5, col: -3},
+        br: {row: 0,col: 0},
+        },
+      'Ddlk': 
+        { 'game-name': 'Deadlock game',
+        'top-name': 'Act','btm-name': 'Wait',
+        'left-name': 'Act','right-name': 'Wait',
+        'prTop-dft': 1,'prRight-dft': 0,
+        'hint': "The players' strictly dominant strategies induce the highest feasible joint payoff, but each player would prefer the other to play the strictly dominated strategy (Act).",
+        tl: {row: 0,col: 0},
+        tr: {row: -3, col: 5},
+        bl: {row: 5, col: -3},
+        br: {row: 2,col: 2},
+        },
+      'ISD-0Sum': 
+        { 'game-name': 'ISD solvable zero-sum game',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "A zero-sum game solvable by Iterated Strict Dominance.",
+        tl: {row: 1,col: -1},
+        tr: {row: 0, col: 0},
+        bl: {row: 3, col: -3},
+        br: {row: -2,col: 2},
+        },
+      'WD': 
+        { 'game-name': 'Weak Dominance',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Each player has a weakly or strictly dominant strategy, but the game has a range of mixed Nash equilibria.",
+        tl: {row: 1,col: 2},
+        tr: {row: 0, col: 3},
+        bl: {row: 0, col: 0},
+        br: {row: 0,col: 1},
+        },
+      'EntryDet': 
+        { 'game-name': 'Entry deterrence game',
+        'top-name': 'Out','btm-name': 'In',
+        'left-name': 'Fight','right-name': 'Not',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Normal form of the game in which, if Row plays In, then Column may Fight or Not. The game has infinitely many Nash equilibria, some involving Column playing Fight, which is weakly dominated. Weak dominance selects the subgame-perfect Nash equilibrium of the dynamic game.",
+        tl: {row: 0,col: 2},
+        tr: {row: 0, col: 2},
+        bl: {row: -1, col: -1},
+        br: {row: 1,col: 0},
+        },
+      'NashFailsWD': 
+        { 'game-name': 'Best Nash fails WD',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "This game has an interval of half-mixed (hybrid) equilibria and one more pure Nash equilibrium. The iterated elimination of all weakly dominated strategies removes the Pareto-efficient Nash equilibrium!",
+        tl: {row: 2,col: 2},
+        tr: {row: 0, col: 2},
+        bl: {row: 1, col: 0},
+        br: {row: 1,col: 1},
+        },
+      'IWD-order': 
+        { 'game-name': 'Order matters in IWD',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Each player has a weakly dominant strategy, yet there is a continuum of Nash equilibria. The order of deletion may matter in Iterated Weak Dominance.",
+        tl: {row: 0,col: 0},
+        tr: {row: 0, col: 1},
+        bl: {row: 1, col: 0},
+        br: {row: 0,col: 0},
+        },
+      'PureCoord': 
+        { 'game-name': 'Pure coordination',
+        'top-name': 'A','btm-name': 'B',
+        'left-name': 'A','right-name': 'B',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "A symmetric pure coordination game. Both (A,A) and (B,B) are Nash, and there is a third, mixed-strategy equilibrium.",
+        tl: {row: 1,col: 1},
+        tr: {row: 0, col: 0},
+        bl: {row: 0, col: 0},
+        br: {row: 1,col: 1},
+        },
+      'FocalCoord': 
+        { 'game-name': 'Focal coordination',
+        'top-name': 'A','btm-name': 'B',
+        'left-name': 'A','right-name': 'B',
+        'prTop-dft': 1/3,'prRight-dft': 2/3,
+        'hint': "There are three Nash equilibria. One of them is Pareto-efficient (strictly preferred by both players to either of the other two equilibria), which arguably makes it focal.",
+        tl: {row: 2,col: 2},
+        tr: {row: 0, col: 0},
+        bl: {row: 0, col: 0},
+        br: {row: 1,col: 1},
+        },
+      'BoS': 
+        { 'game-name': 'Battle of the Sexes',
+        'top-name': 'B','btm-name': 'S',
+        'left-name': 'B','right-name': 'S',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Row prefers to go to the Beach (B), Column to the Store (S). Each gets 2 utils for doing so. Meeting each other is worth 3 more utils to each. A coordination game with three equilibria.",
+        tl: {row: 5,col: 3},
+        tr: {row: 2, col: 2},
+        bl: {row: 0, col: 0},
+        br: {row: 3,col: 5},
+        },
+      'Invest': 
+        { 'game-name': 'Investment game',
+        'top-name': 'In','btm-name': 'Not',
+        'left-name': 'In','right-name': 'Not',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Each player may either keep 1 util or invest it. If and only if both invest, then each gets 2 utils. Similar to stag hunt; in this version neither action is risk dominant.",
+        tl: {row: 2,col: 2},
+        tr: {row: 0, col: 1},
+        bl: {row: 1, col: 0},
+        br: {row: 1,col: 1},
+        },
+      'StagHunt': 
+        { 'game-name': 'Stag hunt game',
+        'top-name': 'Stag','btm-name': 'Hare',
+        'left-name': 'Stag','right-name': 'Hare',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Hunting for a stag yields the highest payoff for each player, but only if both take that action. Hunting hare is a 'safe' choice. Potential tension between Pareto efficiency and risk dominance.",
+        tl: {row: 10,col: 10},
+        tr: {row: 0, col: 7},
+        bl: {row: 7, col: 0},
+        br: {row: 6,col: 6},
+        },
+      'HD': 
+        { 'game-name': 'Hawk-dove game',
+        'top-name': 'Hawk','btm-name': 'Dove',
+        'left-name': 'Hawk','right-name': 'Dove',
+        'prTop-dft': 0.7,'prRight-dft': 0.7,
+        'hint': "Hawk against Dove gets the highest, Hawk against Hawk the lowest payoff. The players' combined payoff is the largest when both play Dove, but that is not a Nash equilibrium. Compare with the game of Chicken.",
+        tl: {row: -3,col: -3},
+        tr: {row: 8, col: 0},
+        bl: {row: 0, col: 8},
+        br: {row: 5,col: 5},
+        },
+      'Chicken': 
+        { 'game-name': 'Game of Chicken',
+        'top-name': 'Dare','btm-name': 'Chkn',
+        'left-name': 'Dare','right-name': 'Chkn',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint':"A miscoordination game that is equivalent to the Hawk-Dove game in ordinal preferences. Here, in contrast to our specification of Hawk-Dove, the total payoff from both playing Chicken (Dove) is less than that in the asymmetric Nash equilibria.",
+        tl: {row: -3,col: -3},
+        tr: {row: 8, col: 0},
+        bl: {row: 0, col: 8},
+        br: {row: 2,col: 2},
+        },
+      'ChCoord': 
+        { 'game-name': 'Chicken as coordination',
+        'top-name': 'AA','btm-name': 'BB',
+        'left-name': 'AA','right-name': 'BB',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "The Game of Chicken expressed as a coordination game.",
+        tl: {row: 8,col: 0},
+        tr: {row: -3, col: -3},
+        bl: {row: 2, col: 2},
+        br: {row: 0,col: 8},
+        },
+      'TwoNash': 
+        { 'game-name': 'Exactly 2 Nash',
+        'top-name': 'Hawk','btm-name': 'Dove',
+        'left-name': 'Hawk','right-name': 'Dove',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Each player has a weakly dominant strategy, yet this is a coordination game with exactly two Nash equilibria (both are pure, the third, mixed equilibrium 'collapses' into one of them). This is a knife-edge case: generic games have an odd number of equilibria.",
+        tl: {row: 2,col: 2},
+        tr: {row: 1, col: 0},
+        bl: {row: 0, col: 1},
+        br: {row: 1,col: 1},
+        },
+      'ContCoord': 
+        { 'game-name': 'Continuous coordination',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "This coordination game has a continuum of Nash equilibria forming an 'L-shaped' range. IWD could select or rule out any of them! The game is non-generic: players do not have strict preferences over outcomes.",
+        tl: {row: 1,col: 2},
+        tr: {row: 0, col: 0},
+        bl: {row: 1, col: 1},
+        br: {row: 2,col: 1},
+        },
+      'MP': 
+        { 'game-name': 'Matching Pennies',
+        'top-name': 'Heads','btm-name': 'Tails',
+        'left-name': 'Heads','right-name': 'Tails',
+        'prTop-dft': 0.5,'prRight-dft': 0.5,
+        'hint': "Row and Column choose Heads or Tails. Row wins if their choices match, Column wins if they do not. Both players mix in equilibrium in order not to be predictable and hence exploitable.",
+        tl: {row: 1,col: -1},
+        tr: {row: -1, col: 1},
+        bl: {row: -1, col: 1},
+        br: {row: 1,col: -1},
+        },
+      'Comp0Sum': 
+        { 'game-name': 'Competitive zero-sum game',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "This game is similar to Matching Pennies (it is zero-sum with 'cycling' best responses), but here each player has a strict preference order over the outcomes, making the game generic.",
+        tl: {row: 2,col: -2},
+        tr: {row: -1, col: 1},
+        bl: {row: -3, col: 3},
+        br: {row: 4,col: -4},
+        },
+      'ConstSum': 
+        { 'game-name': 'Constant-sum game',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "We added 4 to each payoff in the 'Competitive zero-sum' game. The result is a constant-sum, strictly competitive game. The Nash equilibrium remains the same!",
+        tl: {row: 6,col: 2},
+        tr: {row: 3, col: 5},
+        bl: {row: 1, col: 7},
+        br: {row: 8,col: 0},
+        },
+      'EqTo0Sum': 
+        { 'game-name': 'Zero-sum equivalent',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "Same as the 'Competitive zero-sum' game, except Row's payoff is multiplied by 2 then increased by 3; Column's payoff is increased by 2. The Nash equilibrium remains the same!",
+        tl: {row: 7,col: 0},
+        tr: {row: 1, col: 3},
+        bl: {row: -3, col: 5},
+        br: {row: 11,col: -2},
+        },
+      'Contest': 
+        { 'game-name': 'Generic contest game',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
+        'prTop-dft': 0.2,'prRight-dft': 0.7,
+        'hint': "No mutual best replies in pure strategies. There is a unique mixed Nash equilibrium, in which each player mixes to make the other indifferent, or in other words, to be unpredictable.",
+        tl: {row: 2,col: 1},
+        tr: {row: 0, col: 2},
+        bl: {row: 1, col: 1},
+        br: {row: 4,col: 0},
+        },
+      'Cont+1': 
+        { 'game-name': 'Continuum +1 Nash',
+        'top-name': 'T','btm-name': 'B',
+        'left-name': 'L','right-name': 'R',
+        'prTop-dft': 2/3,'prRight-dft': 0,
+        'hint': "Changed Row's payoff to 0 at (T,L) in Hawk-Dove, so Row is indifferent between T and B against L. There is an interval of half-mixed plus one more pure Nash eqm.",
+        tl: {row: 0,col: -3},
+        tr: {row: 8, col: 0},
+        bl: {row: 0, col: 8},
+        br: {row: 5,col: 5},
+        },
+      'Connected': 
+        { 'game-name': 'Connected ranges of Nash',
+        'top-name': 'T','btm-name': 'B',
+        'left-name': 'L','right-name': 'R',
+        'prTop-dft': 2/3,'prRight-dft': 0,
+        'hint': "Row is indifferent no matter what Column plays. The game has four extremal Nash equilibria (two of which are pure, two half-mixed) and three connected components (ranges) of Nash equilibria.",
+        tl: {row: 0,col: -3},
+        tr: {row: 5, col: 0},
+        bl: {row: 0, col: 8},
+        br: {row: 5,col: 5},
+        },
+      }
+    
+    /* START */
+    
+    // define slider (range input) objects whose "".value" will equal the mixing probs
+    // row's vertical slider
+    var vslider = document.getElementById("rowPlaysTop");
+    // column's horizontal slider
+    var hslider = document.getElementById("colPlaysRight");
+    // declare mixing prob variables
+    var prTop;
+    var prRight;
+    var game;
+
+    // initialize the selected game as Hawk-dove
+    chooseGame("HD");
+
+    /* create custom drop-down menus */
+    var x, i, j, l, ll, selElmnt, a, b, c;
+    x = document.getElementsByClassName("custom-select");
+    l = x.length;
+    for (i = 0; i < l; i++) {
+      selElmnt = x[i].getElementsByTagName("select")[0];
+      ll = selElmnt.length;
+      /*for each element, create a new DIV that will act as the selected item:*/
+      a = document.createElement("DIV");
+      a.setAttribute("class", "select-selected");
+      a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+      x[i].appendChild(a);
+      /*for each element, create a new DIV that will contain the option list:*/
+      b = document.createElement("DIV");
+      b.setAttribute("class", "select-items select-hide");
+      for (j = 1; j < ll; j++) {
+        /*for each option in the original select element,
+        create a new DIV that will act as an option item:*/
+        c = document.createElement("DIV");
+        c.innerHTML = selElmnt.options[j].innerHTML;
+        c.setAttribute("value", selElmnt.options[j].getAttribute("value"))
+        c.addEventListener("click", function(e) { 
+          chooseGame(this.getAttribute("value"))
+          /*when an item is clicked, update the original select box,
+          and the selected item:*/
+          var y, i, k, s, h, sl, yl;
+          s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+          sl = s.length;
+          h = this.parentNode.previousSibling;
+          for (i = 0; i < sl; i++) {
+            if (s.options[i].innerHTML == this.innerHTML) {
+              s.selectedIndex = i;
+              y = this.parentNode.getElementsByClassName("same-as-selected");
+              yl = y.length;
+              for (k = 0; k < yl; k++) {
+                y[k].removeAttribute("class");
+              }
+              this.setAttribute("class", "same-as-selected");
+              break;
+              }
+            }
+          h.click();
+        });
+        b.appendChild(c);
+      }
+      x[i].appendChild(b);
+      a.addEventListener("click", function(e) {
+          /*when the select box is clicked, close any other select boxes,
+          and open/close the current select box:*/
+          e.stopPropagation();
+          closeAllSelect(this);
+          this.nextSibling.classList.toggle("select-hide");
+          this.classList.toggle("select-arrow-active");
+        });
+    }
+    /* function that closes all select boxes in the document except the current select box:*/
+    function closeAllSelect(elmnt) {
+      var x, y, i, xl, yl, arrNo = [];
+      x = document.getElementsByClassName("select-items");
+      y = document.getElementsByClassName("select-selected");
+      xl = x.length;
+      yl = y.length;
+      for (i = 0; i < yl; i++) {
+        if (elmnt == y[i]) {
+          arrNo.push(i)
+        } else {
+          y[i].classList.remove("select-arrow-active");
+        }
+      }
+      for (i = 0; i < xl; i++) {
+        if (arrNo.indexOf(i)) {
+          x[i].classList.add("select-hide");
+        }
+      }
+    }
+    /*if user clicks outside the select box then close all select boxes:*/
+    document.addEventListener("click", closeAllSelect);
+    
+    // kill payoff cell formatting and reset BR button
+    function killPayoffFormatting(){
+      document.getElementById("tl-rowPay").style = "font-weight: normal; color:black";
+      document.getElementById("tr-rowPay").style = "font-weight: normal; color:black";
+      document.getElementById("bl-rowPay").style = "font-weight: normal; color:black";
+      document.getElementById("br-rowPay").style = "font-weight: normal; color:black";
+      document.getElementById("tl-colPay").style = "font-weight: normal; color:black";
+      document.getElementById("tr-colPay").style = "font-weight: normal; color:black";
+      document.getElementById("bl-colPay").style = "font-weight: normal; color:black";
+      document.getElementById("br-colPay").style = "font-weight: normal; color:black";
+      document.getElementById("onoff").value="BR Off";
+      document.getElementById("onoff").style="border-radius: 5px; width: 52px; border: none; color: white; background-color: darkgrey; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;";
+    }
+
+    // highlight highest EV for each player
+    function highlightMaxEV(){
+      if(document.getElementById("evCol-Left").innerHTML>document.getElementById("evCol-Right").innerHTML){
+          document.getElementById("evCol-Left").style = "font-weight: bolder; font-size:small; color:red; background-color:white; border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;";
+          document.getElementById("evCol-Right").style = "font-weight: normal; font-size:small; color:rgb(181, 103, 116); background-color:white; border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;";
+      };
+      if(document.getElementById("evCol-Left").innerHTML<document.getElementById("evCol-Right").innerHTML){
+          document.getElementById("evCol-Right").style = "font-weight: bolder; font-size:small; color:red; background-color:white; border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;";
+          document.getElementById("evCol-Left").style = "font-weight: normal; font-size:small; color:rgb(181, 103, 116); background-color:white; border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;";
+      };
+      if(document.getElementById("evCol-Left").innerHTML==document.getElementById("evCol-Right").innerHTML){
+          document.getElementById("evCol-Left").style = "font-weight: bolder; font-size:small; color:red; background-color:white; border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;";
+          document.getElementById("evCol-Right").style = "font-weight: bolder; font-size:small; color:red; background-color:white; border-style:solid;border-color:black;border-width:1px;border-bottom:white;border-left: white;border-right: white;";
+      };
+      if(document.getElementById("evRow-Top").innerHTML>document.getElementById("evRow-Btm").innerHTML){
+          document.getElementById("evRow-Top").style = "font-weight: bolder; font-size:small; color:blue; background-color:white; border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;";
+          document.getElementById("evRow-Btm").style = "font-weight: normal; font-size:small; color:rgb(62, 62, 187); background-color:white; border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;";
+      };
+      if(document.getElementById("evRow-Top").innerHTML<document.getElementById("evRow-Btm").innerHTML){
+          document.getElementById("evRow-Btm").style = "font-weight: bolder; font-size:small; color:blue; background-color:white; border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;";
+          document.getElementById("evRow-Top").style = "font-weight: normal; font-size:small; color:rgb(62, 62, 187); background-color:white; border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;";
+      };
+      if(document.getElementById("evRow-Top").innerHTML==document.getElementById("evRow-Btm").innerHTML){
+          document.getElementById("evRow-Top").style = "font-weight: bolder; font-size:small; color:blue; background-color:white; border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;";
+          document.getElementById("evRow-Btm").style = "font-weight: bolder; font-size:small; color:blue; background-color:white; border-color:black;border-style:solid;border-width:1px;border-top:white;border-bottom:white;border-right:white;";
+      };
+    }
+
+    // function to initialize variables when a new game is chosen
+    function chooseGame(value) {
+      game = games[value];
+      document.getElementById("selectedGameTitle").innerHTML = game['game-name'];
+      document.getElementById("selectedGameHint").innerHTML = game['hint'];
+      document.getElementById("leftLabel").innerHTML = game['left-name'];
+      document.getElementById("rightLabel").innerHTML = game['right-name'];
+      document.getElementById("topLabel").innerHTML = game['top-name'];
+      document.getElementById("btmLabel").innerHTML = game['btm-name']
+      document.getElementById("tl-rowPay").innerHTML = game["tl"]["row"];
+      document.getElementById("tl-colPay").innerHTML = game["tl"]["col"];
+      document.getElementById("tr-rowPay").innerHTML = game["tr"]["row"];
+      document.getElementById("tr-colPay").innerHTML = game["tr"]["col"];
+      document.getElementById("bl-rowPay").innerHTML = game["bl"]["row"];
+      document.getElementById("bl-colPay").innerHTML = game["bl"]["col"];
+      document.getElementById("br-rowPay").innerHTML = game["br"]["row"];
+      document.getElementById("br-colPay").innerHTML = game["br"]["col"];
+      document.getElementById("onoff").value="BR Off";
+      killPayoffFormatting();
+      
+      prTop = game['prTop-dft'];
+      vslider.value = prTop;
+      prRight = game['prRight-dft'];
+      hslider.value = prRight;
+
+      document.getElementById("colPlaysLeftValue").innerHTML = (1-prRight).toFixed(2);
+      document.getElementById("colPlaysRightValue").innerHTML = (1-(1-prRight)).toFixed(2); 
+      document.getElementById("rowPlaysTopValue").innerHTML = "&thinsp;"+(1-(1-prTop)).toFixed(2); 
+      document.getElementById("rowPlaysBtmValue").innerHTML = "&thinsp;"+(1-prTop).toFixed(2); 
+
+      document.getElementById("evRow-Top").innerHTML = ((1-prRight)*game["tl"]["row"] + prRight*game["tr"]["row"]).toFixed(1);
+      document.getElementById("evRow-Btm").innerHTML = ((1-prRight)*game["bl"]["row"] + prRight*game["br"]["row"]).toFixed(1);
+      document.getElementById("evCol-Left").innerHTML = (prTop*game["tl"]["col"] + (1-prTop)*game["bl"]["col"]).toFixed(1)+'&nbsp &nbsp';
+      document.getElementById("evCol-Right").innerHTML = (prTop*game["tr"]["col"] + (1-prTop)*game["br"]["col"]).toFixed(1)+'&nbsp &nbsp';
+      highlightMaxEV();
+      resetNash();
+    }
+    
+    /* update sliders when handle is dragged */
+    hslider.oninput = function() { 
+      prRight = this.value;
+      document.getElementById("colPlaysLeftValue").innerHTML = (1-prRight).toFixed(2); 
+      document.getElementById("colPlaysRightValue").innerHTML = (1-(1-prRight)).toFixed(2); 
+      document.getElementById("evRow-Top").innerHTML = ((1-prRight)*game["tl"]["row"] + prRight*game["tr"]["row"]).toFixed(1);
+      document.getElementById("evRow-Btm").innerHTML = ((1-prRight)*game["bl"]["row"] + prRight*game["br"]["row"]).toFixed(1);
+      highlightMaxEV();
+      resetNash()
+    }
+    
+    vslider.oninput = function() {
+      prTop = this.value
+      document.getElementById("rowPlaysTopValue").innerHTML = "&thinsp;"+(1-(1-prTop)).toFixed(2); 
+      document.getElementById("rowPlaysBtmValue").innerHTML = "&thinsp;"+(1-prTop).toFixed(2); 
+      document.getElementById("evCol-Left").innerHTML = (prTop*game["tl"]["col"] + (1-prTop)*game["bl"]["col"]).toFixed(1)+'&nbsp &nbsp';
+      document.getElementById("evCol-Right").innerHTML = (prTop*game["tr"]["col"] + (1-prTop)*game["br"]["col"]).toFixed(1)+'&nbsp &nbsp';
+      highlightMaxEV();
+      resetNash();
+    }
+
+    // BR switch
+    function onoff(){
+      btnBRvalue = document.getElementById('onoff').value;
+      if(btnBRvalue == "BR Off"){
+        document.getElementById("onoff").value="BR On";
+        document.getElementById("onoff").style="border-radius: 5px; width: 52px; border: none; color: white; background-color: purple; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px; cursor: pointer;";
+        if(document.getElementById("tl-rowPay").innerHTML<=document.getElementById("bl-rowPay").innerHTML){
+          document.getElementById("bl-rowPay").style = "font-weight: bolder; color:blue"};
+        if(document.getElementById("tl-rowPay").innerHTML>=document.getElementById("bl-rowPay").innerHTML){
+          document.getElementById("tl-rowPay").style = "font-weight: bolder; color:blue"};
+        if(document.getElementById("tr-rowPay").innerHTML<=document.getElementById("br-rowPay").innerHTML){
+          document.getElementById("br-rowPay").style = "font-weight: bolder; color:blue"};
+        if(document.getElementById("tr-rowPay").innerHTML>=document.getElementById("br-rowPay").innerHTML){
+          document.getElementById("tr-rowPay").style = "font-weight: bolder; color:blue"};
+        if(document.getElementById("tl-colPay").innerHTML<=document.getElementById("tr-colPay").innerHTML){
+          document.getElementById("tr-colPay").style = "font-weight: bolder; color:red"};
+        if(document.getElementById("tl-colPay").innerHTML>=document.getElementById("tr-colPay").innerHTML){
+          document.getElementById("tl-colPay").style = "font-weight: bolder; color:red"};
+        if(document.getElementById("br-colPay").innerHTML<=document.getElementById("bl-colPay").innerHTML){
+          document.getElementById("bl-colPay").style = "font-weight: bolder; color:red"};
+        if(document.getElementById("br-colPay").innerHTML>=document.getElementById("bl-colPay").innerHTML){
+          document.getElementById("br-colPay").style = "font-weight: bolder; color:red"};
+      }else{
+        killPayoffFormatting();
+      }
+    }
+    // row mix to make col indiff
+    function rowmix(){
+      var pp=(document.getElementById("br-colPay").innerHTML-document.getElementById("bl-colPay").innerHTML);
+      pp=pp/(document.getElementById("tl-colPay").innerHTML-document.getElementById("bl-colPay").innerHTML-(document.getElementById("tr-colPay").innerHTML-document.getElementById("br-colPay").innerHTML));
+      if (pp>=0 && pp<=1){
+        prTop=pp};
+      vslider.value=prTop;
+      document.getElementById("rowPlaysTopValue").innerHTML = "&thinsp;"+(1-(1-prTop)).toFixed(2); 
+      document.getElementById("rowPlaysBtmValue").innerHTML = "&thinsp;"+(1-prTop).toFixed(2); 
+      document.getElementById("evCol-Left").innerHTML = (prTop*game["tl"]["col"] + (1-prTop)*game["bl"]["col"]).toFixed(1)+'&nbsp &nbsp';
+      document.getElementById("evCol-Right").innerHTML = (prTop*game["tr"]["col"] + (1-prTop)*game["br"]["col"]).toFixed(1)+'&nbsp &nbsp';
+      highlightMaxEV();
+      resetNash()
+    }
+
+    // col mix to make row indiff
+    function colmix(){
+      var pp=(document.getElementById("bl-rowPay").innerHTML-document.getElementById("tl-rowPay").innerHTML);
+      pp=pp/(document.getElementById("tr-rowPay").innerHTML-document.getElementById("tl-rowPay").innerHTML-(document.getElementById("br-rowPay").innerHTML-document.getElementById("bl-rowPay").innerHTML));
+      if (pp>=0 && pp<=1){
+        prRight=pp};
+      hslider.value=prRight;
+      document.getElementById("colPlaysLeftValue").innerHTML = (1-prRight).toFixed(2); 
+      document.getElementById("colPlaysRightValue").innerHTML = (1-(1-prRight)).toFixed(2); 
+      document.getElementById("evRow-Top").innerHTML = ((1-prRight)*game["tl"]["row"] + prRight*game["tr"]["row"]).toFixed(1);
+      document.getElementById("evRow-Btm").innerHTML = ((1-prRight)*game["bl"]["row"] + prRight*game["br"]["row"]).toFixed(1);
+      highlightMaxEV();
+      resetNash();
+    }
+
+    // reset isitnash button
+    function resetNash(){
+      document.getElementById("isitnash").value="Is it Nash?";
+      document.getElementById("isitnash").style="border-radius: 5px; width: 80px; border: none; color: white; background-color: orange; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;";
+    };
+
+    // check if Nash
+    function isitNash(){
+      var rowbestresponds = ((document.getElementById("evRow-Top").innerHTML==document.getElementById("evRow-Btm").innerHTML) || (document.getElementById("evRow-Top").innerHTML>=document.getElementById("evRow-Btm").innerHTML)&&(prTop==1) || (document.getElementById("evRow-Top").innerHTML<=document.getElementById("evRow-Btm").innerHTML)&&(prTop==0));
+      var colbestresponds = ((document.getElementById("evCol-Left").innerHTML==document.getElementById("evCol-Right").innerHTML) || (document.getElementById("evCol-Left").innerHTML>=document.getElementById("evCol-Right").innerHTML)&&(prRight==0) || (document.getElementById("evCol-Left").innerHTML<=document.getElementById("evCol-Right").innerHTML)&&(prRight==1));
+      if (rowbestresponds && colbestresponds){
+        document.getElementById("isitnash").value="Nash eqm!";
+        document.getElementById("isitnash").style="border-radius: 5px; width: 80px; border: none; color: white; background-color: green; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;";
+      }else{
+        document.getElementById("isitnash").value="Not Nash!";
+        document.getElementById("isitnash").style="border-radius: 5px; width: 80px; border: none; color: white; background-color: red; padding: 8px 4px; text-align: center; text-decoration: none; display: inline-block; font-size: 15px; margin-left:-1px;cursor: pointer;";
+      }
+    }
+  </script>
+  
+</body>
+</html>
