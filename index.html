@@ -6,7 +6,9 @@
   <title>Two-by-two game analysis</title>
 
   <style>
-    * {font-family: 'Helvetica', 'Arial', sans-serif; font-size: 15px; max-width: 510px;
+    * {font-family: 'Helvetica', 'Arial', sans-serif; 
+      font-size: 15px; 
+      max-width: 400px;
     }
 
     /* Dropdown menu formatting */
@@ -142,7 +144,7 @@
 
 <body>
   
-  <div class="custom-select" style="width:120px;" >
+  <div class="custom-select" style="width:110px;" >
     <select>
       <option value="0">Dominance</option>
       <option value="ISD-Row">ISD (1)</option>
@@ -168,38 +170,29 @@
       <option value="Invest">Investment</option>
       <option value="HD">Hawk-dove</option>
       <option value="Chicken">Chicken</option>
-      <option value="ChCoord">Chicken as coord. game</option>
+      <option value="ChCoord">Chicken as coordination</option>
       <option value="TwoNash">Two Nash</option>
       <option value="ContCoord">Continuous coordination</option>
     </select>
   </div>
   
-  <div class="custom-select" style="width:120px;" >
+  <div class="custom-select" style="width:100px;" >
     <select>
-      <option value="0">Competitive</option>
-      <option value="MP">Matching p's</option>
-      <option value="Comp0Sum">Competitive zero-sum</option>
+      <option value="0">Various</option>
+      <option value="MP">Matching Pennies</option>
+      <option value="Comp0Sum">Zero-sum contest</option>
       <option value="ConstSum">Constant-sum</option>
-      <option value="EqTo0Sum">Transformed zero-sum</option>
+      <option value="EqTo0Sum">Zero-sum equivalent</option>
       <option value="Contest">Contest</option>
-    </select>
-  </div>
-
-  <div class="custom-select" style="width:120px;" >
-    <select>
-      <option value="0">Nongeneric</option>
       <option value="TwoNash">Two Nash </option>
-      <option value="ContCoord">Continuous coordination</option>
-      <option value="NashFailsWD">Nash fails WD</option>
       <option value="Cont+1">Continuum +1 Nash</option>
-      <option value="Connected">Connected ranges of Nash</option>
-      <option value="EntryDet">Entry deterrence</option>
+      <option value="Connected">Connected ranges</option>
     </select>
   </div>
 
   <!-- Page title and explanatory text -->
   <h2 style="font-size:19px">Equilibrium in 2x2 Games</h2>
-  <p>Choose a game from the categories above. Adjust the sliders representing (mixed) strategies and click on the "Is it Nash?" button to verify if they form a Nash equilibrium. "Row mix" sets the vertical slider (Row's mixing probability) to make Column indifferent. "Col mix" works analogously. The "BR Off/On" button hides/highlights best-reply payoffs in the table.</p>
+  <p>Choose a game from the categories above. Adjust the sliders representing (mixed) strategies and click on "Is it Nash?" to verify if they form a Nash equilibrium. "Row mix" sets Row's mixing probability to make Column indifferent. "Col mix" works analogously. The "BR Off/On" button hides/highlights best-reply payoffs in the table.</p>
   
   <!-- Display selected game title and the mixing sliders -->
   <h3 style="font-size:17px"> <div id="selectedGameTitle"></div> </h3>
@@ -528,8 +521,8 @@
         },
       'TwoNash': 
         { 'game-name': 'Exactly 2 Nash',
-        'top-name': 'Hawk','btm-name': 'Dove',
-        'left-name': 'Hawk','right-name': 'Dove',
+        'top-name': 'Up','btm-name': 'Down',
+        'left-name': 'Left','right-name': 'Right',
         'prTop-dft': 0.2,'prRight-dft': 0.7,
         'hint': "Each player has a weakly dominant strategy, yet this is a coordination game with exactly two Nash equilibria (both are pure, the third, mixed equilibrium 'collapses' into one of them). This is a knife-edge case: generic games have an odd number of equilibria.",
         tl: {row: 2,col: 2},
